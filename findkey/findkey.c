@@ -49,36 +49,42 @@ static char RCSID[]="$Id: findkey.c,v 1.6 2002/11/02 15:12:06 lucifer Exp $";
 
 static void usage( char *name )
 {
-    fprintf( stderr, "Usage: %s <key0> <key1> <key2> [<pwdlen> <initvalue>]\n", name );
+    fprintf( stderr, "Usage: %s <key0> <key1> <key2> [<pwdlen> <initvalue> [<endvalue>]]\n", name );
     fprintf( stderr, "<key0>, <key1> and <key2> must be in hexadecimal.\n" );
-    fprintf( stderr, "<pwd> and <initvalue> can be given to continue an interrupted search.\n" );
-    fprintf( stderr, "<initvalue> must also be in hexadecimal.\n" );
+    fprintf( stderr, "<pwd>, <initvalue> and <endvalue> can be given to continue an interrupted search.\n" );
+    fprintf( stderr, "<initvalue> and <endvalue> must also be in hexadecimal.\n" );
+    fprintf( stderr, "If provided: <endvalue> must be inferior or equal to <initvalue>.\n" );
     exit( 1 );
 }
 
 void main( int argc, char **argv )
 {
-uword	key0, key1, key2;
-int	pwdLen=0;
-uword	initBytes;
+    uword key0, key1, key2;
+    int pwdLen=0;
+    uword initBytes;
+    uword endBytes=0xffffffff;
 
-    if( argc != 4 && argc != 6 )
-	usage( argv[0] );
+    if( argc != 4 && argc != 6 && argc != 7 )
+        usage( argv[0] );
 
     if( sscanf( argv[1], "%x", &key0 ) != 1 ||
-	sscanf( argv[2], "%x", &key1 ) != 1 ||
-	sscanf( argv[3], "%x", &key2 ) != 1 )
-	usage( argv[0] );
+        sscanf( argv[2], "%x", &key1 ) != 1 ||
+        sscanf( argv[3], "%x", &key2 ) != 1 )
+        usage( argv[0] );
 
     if( argc == 6 && (sscanf( argv[4], "%d", &pwdLen ) != 1 ||
-		      sscanf( argv[5], "%x", &initBytes ) != 1) )
-	usage( argv[0] );
+		    sscanf( argv[5], "%x", &initBytes ) != 1) )
+        usage( argv[0] );
+
+    if( argc == 7 && (sscanf( argv[6], "%d", &endBytes ) != 1 ||
+        endBytes > initBytes))
+        usage( argv[0] );
 
     mkCrcTab( );
     initMulTab( );
 
     if( pwdLen > 0 )
-	findLongPwd( key0, key1, key2, pwdLen, initBytes );
+        findLongPwd( key0, key1, key2, pwdLen, initBytes, endBytes );
     else
-	findPwd( key0, key1, key2 );
+        findPwd( key0, key1, key2 );
 }

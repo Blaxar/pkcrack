@@ -33,6 +33,6 @@
 #include "pkctypes.h"
 
 extern void findPwd( uword key0, uword key1, uword key2 );
-extern void findLongPwd( uword key0, uword key1, uword key2, int pwdLen, uword initBytes );
+extern void findLongPwd( uword key0, uword key1, uword key2, int pwdLen, uword initBytes, uword endBytes );
 
 #endif /* _STAGE3_H */

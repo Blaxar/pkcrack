@@ -58,15 +58,15 @@ static char RCSID[]="$Id: stage3.c,v 1.10 2002/12/30 18:27:25 lucifer Exp $";
 #include "keystuff.h"
 #include "mktmptbl.h"
 
-#define	BYTES_BEFORE_INIT	4
+#define    BYTES_BEFORE_INIT    4
 
-static byte	pwd[15];
-static int	pwdLen;
+static byte    pwd[15];
+static int    pwdLen;
 
-static uword	l0, l1, l2, m0, m1, m2;
-static uword	key1list[7], key0list[7];
+static uword    l0, l1, l2, m0, m1, m2;
+static uword    key1list[7], key0list[7];
 
-#ifndef	SLOW
+#ifndef    SLOW
 #define updateKeys(x) fast_updateKeys(x)
 static void fast_updateKeys( byte plainbyte )
 /* we don't need temp and key3... */
@@ -81,9 +81,9 @@ static int recursion1( int i, int (*foundFunc)() )
 /* given a value for key1_i, compute all possible values of key1_{i-1} that
  * fit the MSB of key1_{i-2}. See also recursion in stage2.c. */
 {
-int	k, res=0, t;
-uword	MSBiminus1, MSBiminus2, lsbkey0, rhs, test, temp2;
-byte	diff;
+int    k, res=0, t;
+uword    MSBiminus1, MSBiminus2, lsbkey0, rhs, test, temp2;
+byte    diff;
 
     MSBiminus1 = key1list[i-1] & MSBMASK;
     MSBiminus2 = key1list[i-2] & MSBMASK;
@@ -91,16 +91,16 @@ byte	diff;
     temp2 = MULT(rhs-1);
     diff = MSB( temp2 - MSBiminus2 );
     for (t = 2; t; t--, diff--) for( k = 0; k < mTab2Counter[diff]; k++ ) {
-	lsbkey0 = mTab2[diff][k];
-	test = temp2 - mulTab[lsbkey0] - MSBiminus2;
-	if( test <= MAXDELTA && (((rhs-lsbkey0)&MSBMASK)==MSBiminus1) ) {
-	    key1list[i-1] = rhs - lsbkey0;
-	    key0list[i]   = lsbkey0;
-	    if( i > 4 )
-		res |= recursion1( i-1, foundFunc );
-	    else
-		res |= foundFunc();
-	}
+    lsbkey0 = mTab2[diff][k];
+    test = temp2 - mulTab[lsbkey0] - MSBiminus2;
+    if( test <= MAXDELTA && (((rhs-lsbkey0)&MSBMASK)==MSBiminus1) ) {
+        key1list[i-1] = rhs - lsbkey0;
+        key0list[i]   = lsbkey0;
+        if( i > 4 )
+        res |= recursion1( i-1, foundFunc );
+        else
+        res |= foundFunc();
+    }
     }
 
     return res;
@@ -108,8 +108,8 @@ byte	diff;
 
 static int testPwd( )
 {
-int	i, res=0;
-uword	k0, k1, k2;
+int    i, res=0;
+uword    k0, k1, k2;
 
     k0 = key0;
     k1 = key1;
@@ -122,9 +122,9 @@ uword	k0, k1, k2;
     key2 = KEY2INIT;
 #endif
     for( i = 0; i < pwdLen; i++ )
-	updateKeys( pwd[i] );
+    updateKeys( pwd[i] );
     if( key0 == l0 && key1 == l1 && key2 == l2 )
-	res = 1;
+    res = 1;
 
     key0 = k0;
     key1 = k1;
@@ -135,19 +135,19 @@ uword	k0, k1, k2;
 
 static int printPwd( )
 {
-int	i;
+int    i;
 
     if( testPwd() )
     {
-	printf( "Key:" );
-	for( i = 0; i < pwdLen; i++ )
-	    printf( " %02x", pwd[i] );
-	printf( "\nOr as a string: '" );
-	for( i = 0; i < pwdLen; i++ )
-	    printf( "%c", pwd[i] );
-	printf( "' (without the enclosing single quotes)\n" );
-	fflush( stdout );
-	return 1;
+    printf( "Key:" );
+    for( i = 0; i < pwdLen; i++ )
+        printf( " %02x", pwd[i] );
+    printf( "\nOr as a string: '" );
+    for( i = 0; i < pwdLen; i++ )
+        printf( "%c", pwd[i] );
+    printf( "' (without the enclosing single quotes)\n" );
+    fflush( stdout );
+    return 1;
     }
 
     return 0;
@@ -166,7 +166,7 @@ static int print4Bytes( byte b1, byte b2, byte b3, byte b4 )
 /* Find 4 bytes with crc(crc(crc(crc(init,b1),b2),b3),b4) == result */
 static int find4Bytes( uword init, uword result, int (*foundFunc)( byte b1, byte b2, byte b3, byte b4 ) )
 {
-    int	i;
+    int    i;
     uword temp;
 
     temp = result;
@@ -178,7 +178,7 @@ static int find4Bytes( uword init, uword result, int (*foundFunc)( byte b1, byte
 
 static int find5c( byte b1, byte b2, byte b3, byte b4 )
 {
-int	res;
+int    res;
 
     pwd[pwdLen++] = b1;
     pwd[pwdLen++] = b2;
@@ -195,17 +195,17 @@ int	res;
 
 static int find5b( )
 {
-int	i, res=0;
-uword	key00;
+int    i, res=0;
+uword    key00;
 
     for( i = 0; i < 256; i++ )
     {
-	key00 = INVCRC32(l0,i);
-	if( (key00&0xff) == (key0list[5]&0xff) )
-	{
-	    pwd[pwdLen+4] = i;
-	    res |= find4Bytes( key0, key00, find5c );
-	}
+    key00 = INVCRC32(l0,i);
+    if( (key00&0xff) == (key0list[5]&0xff) )
+    {
+        pwd[pwdLen+4] = i;
+        res |= find4Bytes( key0, key00, find5c );
+    }
     }
 
     return res;
@@ -222,7 +222,7 @@ static int find5a( byte b1, byte b2, byte b3, byte b4 )
 
 static int find5Bytes( )
 {
-uword	key20;
+uword    key20;
 
     initkeys();
 
@@ -234,10 +234,10 @@ uword	key20;
 
 static int find6c( byte b1, byte b2, byte b3, byte b4 )
 {
-int	res;
+int    res;
 
 #ifdef SLOW
-uword	k0, k1, k2;
+uword    k0, k1, k2;
 
     k0 = key0;
     k1 = key1;
@@ -270,7 +270,7 @@ uword	k0, k1, k2;
 #ifdef SLOW
     }
     else
-	res = 0;
+    res = 0;
 
     key0 = k0;
     key1 = k1;
@@ -282,8 +282,8 @@ uword	k0, k1, k2;
 
 static int find6b( )
 {
-uword	i, j;
-uword	key00, key0minus1;
+uword    i, j;
+uword    key00, key0minus1;
 
     i = (key0list[6]^crcinvtab[MSB(l0)])&0xff;
     key00 = INVCRC32(l0,i);
@@ -305,14 +305,14 @@ static int find6a( byte b1, byte b2, byte b3, byte b4 )
 
 static int find6Bytes( )
 {
-uword	key10, key20, key2minus1;
+uword    key10, key20, key2minus1;
 
 #ifdef SLOW
-int	i;
+int    i;
 
     initkeys();
     for( i = 0; i < pwdLen; i++ )
-	updateKeys( pwd[i] );
+    updateKeys( pwd[i] );
 #else
     key0 = m0;
     key1 = m1;
@@ -327,10 +327,10 @@ int	i;
     return find4Bytes( key2, key2minus1, find6a );
 }
 
-void findLongPwd( uword key0, uword key1, uword key2, int initLength, uword initBytes )
+void findLongPwd( uword key0, uword key1, uword key2, int initLength, uword initBytes, uword endBytes )
 {
-int	i, j;
-uword	key0list[20], key1list[20], key2list[20];
+    int i, j;
+    uword key0list[20], key1list[20], key2list[20];
 
     l0 = key0;
     l1 = key1;
@@ -350,52 +350,57 @@ uword	key0list[20], key1list[20], key2list[20];
  */
     for( i = pwdLen-1; i >= 0; i-- )
     {
-	if( pwdLen-i < BYTES_BEFORE_INIT )
-	    pwd[i] = 1;
-	else if( pwdLen-i < BYTES_BEFORE_INIT+4 )
-	    pwd[i] = (initBytes>>((pwdLen-i-BYTES_BEFORE_INIT)*8))&0xff;
-	else
-	    pwd[i] = 1; /* not exactly useful. */
+        if( pwdLen-i < BYTES_BEFORE_INIT )
+            pwd[i] = 1;
+        else if( pwdLen-i < BYTES_BEFORE_INIT+4 )
+            pwd[i] = (initBytes>>((pwdLen-i-BYTES_BEFORE_INIT)*8))&0xff;
+        else
+            pwd[i] = 1; /* not exactly useful. */
     }
     key0list[0] = KEY0INIT;
     key1list[0] = KEY1INIT;
     key2list[0] = KEY2INIT;
     for( i = 1; i < pwdLen; i++ )
     {
-	key0list[i] = CRC32( key0list[i-1], pwd[i-1] );
-	key1list[i] = (key1list[i-1] + (key0list[i]&0xff))*CONST + 1;
-	key2list[i] = CRC32( key2list[i-1], MSB(key1list[i]) );
+        key0list[i] = CRC32( key0list[i-1], pwd[i-1] );
+        key1list[i] = (key1list[i-1] + (key0list[i]&0xff))*CONST + 1;
+        key2list[i] = CRC32( key2list[i-1], MSB(key1list[i]) );
     }
     m0 = CRC32( key0list[pwdLen-1], pwd[pwdLen-1] );
     m1 = (key1list[pwdLen-1] + (m0&0xff))*CONST + 1;
     m2 = CRC32( key2list[pwdLen-1], MSB(m1) );
 
     while( !find6Bytes( ) ){
-	for( i = pwdLen-1; i >= 0 && !(++pwd[i]); i-- );
-	for( j = i+1; j < pwdLen; j++ )
-	    pwd[j] = 1;
-	if( i < 0 )
-	{
-	    pwd[pwdLen++] = 1;
-	    i = 0;
-	}
-	if( pwdLen-i >= BYTES_BEFORE_INIT )
-	{
-	    initBytes = 0;
-	    for( j = pwdLen-BYTES_BEFORE_INIT; j > pwdLen-BYTES_BEFORE_INIT-4 && j >= 0; j-- )
-		initBytes |= (((uword)pwd[j])<<((pwdLen-BYTES_BEFORE_INIT-j)*8));
-	    printf( "%2d: %8x\r", pwdLen+6, initBytes );
-	    fflush( stdout );
-	}
-	for( ; i < pwdLen-1; i++ )
-	{
-	    key0list[i+1] = CRC32( key0list[i], pwd[i] );
-	    key1list[i+1] = (key1list[i] + (key0list[i+1]&0xff))*CONST + 1;
-	    key2list[i+1] = CRC32( key2list[i], MSB(key1list[i+1]) );
-	}
-	m0 = CRC32( key0list[pwdLen-1], pwd[pwdLen-1] );
-	m1 = (key1list[pwdLen-1] + (m0&0xff))*CONST + 1;
-	m2 = CRC32( key2list[pwdLen-1], MSB(m1) );
+        for( i = pwdLen-1; i >= 0 && !(++pwd[i]); i-- );
+        for( j = i+1; j < pwdLen; j++ )
+            pwd[j] = 1;
+        if( i < 0 )
+        {
+            pwd[pwdLen++] = 1;
+            i = 0;
+        }
+        if( pwdLen-i >= BYTES_BEFORE_INIT )
+        {
+            initBytes = 0;
+            for( j = pwdLen-BYTES_BEFORE_INIT; j > pwdLen-BYTES_BEFORE_INIT-4 && j >= 0; j-- )
+                initBytes |= (((uword)pwd[j])<<((pwdLen-BYTES_BEFORE_INIT-j)*8));
+
+            if( initBytes > endBytes )
+            {
+                break;
+            }
+            printf( "%2d: %8x\r", pwdLen+6, initBytes );
+            fflush( stdout );
+        }
+        for( ; i < pwdLen-1; i++ )
+        {
+            key0list[i+1] = CRC32( key0list[i], pwd[i] );
+            key1list[i+1] = (key1list[i] + (key0list[i+1]&0xff))*CONST + 1;
+            key2list[i+1] = CRC32( key2list[i], MSB(key1list[i+1]) );
+        }
+        m0 = CRC32( key0list[pwdLen-1], pwd[pwdLen-1] );
+        m1 = (key1list[pwdLen-1] + (m0&0xff))*CONST + 1;
+        m2 = CRC32( key2list[pwdLen-1], MSB(m1) );
     }
 }
 
@@ -403,8 +408,8 @@ static int findShortPwd( uword key0, uword key1, uword key2 )          /* of len
 {
     if ( key0 == KEY0INIT && key1 == KEY1INIT && key2 == KEY2INIT )
     {
-	printf ( "Null (i.e. zero length) key!!!\n" );
-	return 1;
+    printf ( "Null (i.e. zero length) key!!!\n" );
+    return 1;
     }
     else
     {
@@ -435,13 +440,13 @@ void findPwd( uword key0, uword key1, uword key2 )
     if( !findShortPwd( key0, key1, key2 ) )
     {
         if( !find4Bytes( KEY0INIT, key0, print4Bytes ) )
-	{
-	    pwdLen = 0;
-	    m0 = KEY0INIT;
-	    m1 = KEY1INIT;
-	    m2 = KEY2INIT;
-	    if( !find5Bytes( ) && !find6Bytes( ) )
-	        findLongPwd( key0, key1, key2, 7, 0 );
-	}
+        {
+            pwdLen = 0;
+            m0 = KEY0INIT;
+            m1 = KEY1INIT;
+            m2 = KEY2INIT;
+            if( !find5Bytes( ) && !find6Bytes( ) )
+                findLongPwd( key0, key1, key2, 7, 0, 0xffffffff );
+        }
     }
 }
